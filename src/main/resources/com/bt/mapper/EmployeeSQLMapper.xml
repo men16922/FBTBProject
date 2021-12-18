@@ -1,0 +1,565 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.EmployeeSQLMapper">
+	<select id="selectByCode" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT * 
+      FROM Employee
+      WHERE emp_code = #{emp_code}
+   ]]>
+	</select>
+
+	<select id="getempcodebyempno" resultType="String">
+   <![CDATA[
+      SELECT emp_code
+      FROM Employee
+      WHERE emp_no = #{emp_no}
+   ]]>
+	</select>
+
+	<select id="selectByEmpNo_for_confirm"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT * from employee where emp_no=#{emp_no}
+   ]]>
+	</select>
+	
+	<select id="selectDeptName" resultType="com.bt.vo.DeptVo">
+   <![CDATA[
+      SELECT department.*
+      FROM Employee,department
+      WHERE Employee.emp_no =#{emp_no} and
+        employee.dept_no = department.dept_no
+   ]]>
+	</select>
+	
+	<select id="selectRankByEmpNo"
+		resultType="com.bt.vo.EmployeeRankVo">
+   <![CDATA[
+      select employee_rank.rank_name from employee_rank, employee 
+      where employee.emp_no=#{emp_no} 
+      and employee.rank_no = employee_rank.rank_no
+      
+   ]]>
+	</select>
+
+	<select id="selectBranchByEmpNo" resultType="com.bt.vo.BranchVo">
+   <![CDATA[
+      select branch.* from branch, employee 
+      where Employee.emp_no =#{emp_no} and
+      employee.branch_no = branch.branch_no
+      
+   ]]>
+	</select>
+
+	<select id="selectEmpByBranchNo"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+   
+      SELECT * FROM employee WHERE branch_no = #{branch_no} 
+     
+   ]]>
+	</select>
+	
+	<select id="selectEmployeeByBranch_no"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+
+      select * from employee 
+      where 
+      branch_no= #{branch_no}
+      
+      ]]>
+	</select>
+
+	<select id="selectEmp" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT * FROM Employee
+      WHERE dept_no = 40
+      AND branch_no = #{branch_no}
+   ]]>
+	</select>
+
+	<select id="selectAll" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT * FROM Employee
+   ]]>
+	</select>
+
+
+	<select id="selectAllCount" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT *
+       FROM (
+         SELECT ROWNUM rnum, t1.*
+         FROM(
+      SELECT *
+       FROM Employee
+       ) t1
+              ) t2
+          WHERE t2.rnum >= (#{curr_page}-1)*10+1 AND t2.rnum <= #{curr_page}*10
+   ]]>
+	</select>
+
+	<select id="selectByIdPwForConfirm" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT *
+       FROM Employee
+      WHERE emp_no = #{emp_no} AND emp_password = #{emp_password}
+   ]]>
+	</select>
+	
+	<select id="Findpassword"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT *
+       FROM Employee
+      WHERE emp_name = #{emp_name} AND emp_no = #{emp_no} AND emp_email = #{emp_email}
+   ]]>
+	</select>
+
+	<select id="selectByEmpCodeAndPw"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[      
+   SELECT * 
+   FROM Employee
+   WHERE emp_password = #{emp_password} AND emp_code = #{emp_code}
+   ]]>
+	</select>
+
+	<select id="selectByDeptNo" resultType="com.bt.vo.DeptVo">
+   <![CDATA[
+      SELECT *
+       FROM Department
+      WHERE dept_no = #{dept_no}
+   ]]>
+	</select>
+
+	<select id="selectByDeptTypeNo"
+		resultType="com.bt.vo.DeptTypeVo">
+   <![CDATA[
+      SELECT *
+       FROM Department_type
+      WHERE dept_type_no = #{dept_type_no}
+   ]]>
+	</select>
+
+	<select id="selectByEmpRankNo"
+		resultType="com.bt.vo.EmployeeRankVo">
+   <![CDATA[
+      SELECT * 
+      FROM Employee_rank
+      WHERE rank_no = #{rank_no }
+   ]]>
+	</select>
+
+	<select id="selectByBranchNo" resultType="com.bt.vo.BranchVo">
+   <![CDATA[
+      SELECT * 
+      FROM Branch
+      WHERE branch_no = #{branch_no }
+   ]]>
+	</select>
+
+	<select id="selectByEmpByDeptNo"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT * 
+      FROM Employee
+      WHERE dept_no = #{dept_no}
+   ]]>
+	</select>
+	
+	
+	<select id="selectByEmpName_and_EmpAddress"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+
+     
+      select DISTINCT employee.*
+      from employee, branch
+      where 
+      branch.emp_code = employee.emp_code and
+      branch.branch_type_no=3 and
+      employee.emp_name like '%'|| #{emp_name} ||'%'
+      and branch.branch_address like '%'|| #{branch_address} ||'%'
+      ]]>
+		<if test="branch_no!=0">
+			and branch.branch_no=#{branch_no}
+		</if>
+
+	</select>
+
+
+	<select id="selectByEmpName_and_EmpAddressForStore"
+		resultType="com.bt.vo.EmployeeVo">
+
+      <![CDATA[
+      select DISTINCT employee.*
+      from employee, branch
+      where 
+      branch.emp_code = employee.emp_code and
+      branch.branch_type_no=2 
+      and employee.emp_name like '%'|| #{emp_name} ||'%' 
+      and branch.branch_address like '%'|| #{branch_address} ||'%'
+      ]]>
+		<if test="branch_no!=0">
+			and branch.branch_no=#{branch_no}
+		</if>
+	</select>
+
+
+	<select id="selectByEmpName_and_EmpCodeForEmployeeManagement" resultType="com.bt.vo.EmployeeVo">
+   
+   <![CDATA[SELECT *
+          FROM (
+            SELECT ROWNUM rnum, t1.*
+            FROM(
+      select employee.* 
+      from employee,branch
+      where branch.branch_no = employee.branch_no
+      and employee.emp_no != 0
+      and employee.check_resignation='N'
+      ]]>
+      <if test="dept_no!=0">and employee.dept_no = #{dept_no} </if>
+      <if test="branch_no!=0">and employee.branch_no = #{branch_no}</if>
+      <if test="rank_no!=0">and employee.rank_no = #{rank_no} </if>
+      <if test="emp_name!=''">and employee.emp_name like '%'|| #{emp_name} ||'%' </if>
+      <if test="emp_no!=0">and TO_CHAR(employee.emp_no) LIKE '%'|| #{emp_no} ||'%'</if>
+      <if test="start_date!=''">and employee.start_date >= TO_DATE(#{start_date},'YYYY-MM-DD')</if>
+      <if test="orderby==1">ORDER BY employee.emp_no ASC</if>
+      <if test="orderby==2">ORDER BY employee.emp_name ASC</if>
+      <if test="orderby==3">ORDER BY employee.dept_no ASC</if>
+      <if test="orderby==4">ORDER BY employee.rank_no ASC</if>
+      <if test="orderby==5">ORDER BY employee.start_date ASC</if>
+   <![CDATA[   ) t1
+              ) t2
+          WHERE t2.rnum >= (#{curr_page}-1)*10+1 AND t2.rnum <= #{curr_page}*10]]>
+         
+      
+   </select>
+
+   
+
+    <select id="selectByEmpName_and_EmpCodeForEmployeeManagement2" resultType="com.bt.vo.EmployeeVo">
+   
+
+  <![CDATA[SELECT *
+          FROM (
+            SELECT ROWNUM rnum, t1.*
+            FROM(
+      select employee.* 
+      from employee,branch
+      where branch.branch_no = employee.branch_no
+      and employee.emp_no != 0
+      and employee.check_resignation='N'
+      ]]>
+      <if test="dept_no!=0">and employee.dept_no = #{dept_no} </if>
+      <if test="branch_no!=0">and employee.branch_no = #{branch_no}</if>
+      <if test="rank_no!=0">and employee.rank_no = #{rank_no} </if>
+      <if test="emp_name!=''">and employee.emp_name like '%'|| #{emp_name} ||'%' </if>
+      <if test="emp_no!=0">and TO_CHAR(employee.emp_no) LIKE '%'|| #{emp_no} ||'%'</if>
+      <if test="start_date!=''">and employee.start_date >= TO_DATE(#{start_date},'YYYY-MM-DD')</if>
+      <if test="orderby==1">ORDER BY employee.emp_no ASC</if>
+      <if test="orderby==2">ORDER BY employee.emp_name ASC</if>
+      <if test="orderby==3">ORDER BY employee.dept_no ASC</if>
+      <if test="orderby==4">ORDER BY employee.rank_no ASC</if>
+      <if test="orderby==5">ORDER BY employee.start_date ASC</if>
+   <![CDATA[   ) t1
+              ) t2
+          WHERE t2.rnum >= (#{curr_page}-1)*1+1 AND t2.rnum <= #{curr_page}*1]]>
+         
+
+      
+   </select>
+
+
+
+
+<select id="selectByEmpName_and_EmpCodeForEmployeeManagement_resignation" resultType="com.bt.vo.EmployeeVo">
+  
+<![CDATA[
+      SELECT *
+          FROM (
+            SELECT ROWNUM rnum, t1.*
+            FROM(
+      select employee.* 
+      from employee,branch
+      where branch.branch_no = employee.branch_no
+      and employee.emp_no != 0
+      ]]>
+      <if test="dept_no!=0">and employee.dept_no = #{dept_no} </if>
+      <if test="branch_no!=0">and employee.branch_no = #{branch_no}</if>
+      <if test="rank_no!=0">and employee.rank_no = #{rank_no} </if>
+      <if test="emp_name!=''">and employee.emp_name like '%'|| #{emp_name} ||'%' </if>
+      <if test="emp_no!=0">and TO_CHAR(employee.emp_no) LIKE '%'|| #{emp_no} ||'%'</if>
+     <if test="start_date!=''"> and employee.start_date BETWEEN TO_DATE(#{start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{end_date},'YYYY-MM-DD') </if>
+      <![CDATA[ AND
+      employee.check_resignation='N'
+      ) t1
+              ) t2
+          WHERE t2.rnum >= (#{curr_page}-1)*10+1 AND t2.rnum <= #{curr_page}*10]]>
+
+    
+   </select>
+
+   
+	   <select id="getBoardList_employee_paging" resultType="int">
+   <![CDATA[
+
+      select count(*) from (
+
+      select employee.* 
+      from employee,branch
+      where branch.branch_no = employee.branch_no
+      and employee.emp_no != 0
+      and employee.check_resignation='N'
+      ]]>
+      <if test="dept_no!=0">and employee.dept_no = #{dept_no} </if>
+      <if test="branch_no!=0">and employee.branch_no = #{branch_no}</if>
+      <if test="rank_no!=0">and employee.rank_no = #{rank_no} </if>
+      <if test="emp_name!=''">and employee.emp_name like '%'|| #{emp_name} ||'%' </if>
+      <if test="emp_no!=0">and TO_CHAR(employee.emp_no) LIKE '%'|| #{emp_no} ||'%'</if>
+      <if test="start_date!=''">and employee.start_date >= TO_DATE(#{start_date},'YYYY-MM-DD')</if>
+      <if test="orderby==1">ORDER BY employee.emp_no ASC</if>
+      <if test="orderby==2">ORDER BY employee.emp_name ASC</if>
+      <if test="orderby==3">ORDER BY employee.dept_no ASC</if>
+      <if test="orderby==4">ORDER BY employee.rank_no ASC</if>
+      <if test="orderby==5">ORDER BY employee.start_date ASC</if>
+      
+<![CDATA[)
+      
+      ]]>
+   </select>
+
+   
+	  <select id="getBoardList_employee_paging_resignation"
+      resultType="int">
+<![CDATA[
+   select count(*) from (
+      select employee.* 
+      from employee,branch
+      where branch.branch_no = employee.branch_no]]>
+      <if test="dept_no!=0">and employee.dept_no = #{dept_no} </if>
+      <if test="branch_no!=0">and employee.branch_no = #{branch_no}</if>
+      <if test="rank_no!=0">and employee.rank_no = #{rank_no} </if>
+      <if test="emp_name!=''">and employee.emp_name like '%'|| #{emp_name} ||'%' </if>
+      <if test="emp_no!=0">and TO_CHAR(employee.emp_no) LIKE '%'|| #{emp_no} ||'%'
+      </if>
+      <if test="start_date!=''"> and employee.start_date BETWEEN TO_DATE(#{start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{end_date},'YYYY-MM-DD') </if>
+      <![CDATA[ AND
+      employee.check_resignation='N'
+     )]]>
+   </select>
+	
+	
+	<select id="selectEmployeeByDept_no"
+		resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+
+      select * from employee,branch
+      where 
+      employee.dept_no = #{dept_no}
+      and branch.branch_no = #{branch_no}
+      ]]>
+	</select>
+
+
+
+	<select id="insertEmployee" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      INSERT INTO Employee 
+      VALUES(
+       employee_seq.NEXTVAL, #{emp_no}, #{emp_name}, 
+       #{dept_no}, #{rank_no},TO_DATE(#{start_date},'YYYY-MM-DD'), 'N', #{emp_phone},
+       #{emp_address}, #{emp_sex},#{emp_residentnum},#{emp_residentnum},
+       #{emp_email},#{branch_no}
+       )
+
+      ]]>
+   </select>
+
+
+	<select id="selectMaxEmpNoforCreateNewEmpNo" resultType="int">
+   <![CDATA[
+      select max(substr(emp_no,-3,3)) from employee where substr(emp_no,0,4) 
+      = (SELECT EXTRACT(YEAR FROM SYSDATE) AS YEAR from DUAL)
+
+
+      ]]>
+	</select>
+	<select id="selectByEmpCode" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+      SELECT * FROM Employee WHERE emp_code = #{emp_code}
+   ]]>
+	</select>
+	
+	<select id="selectDeptAll" resultType="com.bt.vo.DeptVo">
+   <![CDATA[
+      SELECT * FROM Department
+   ]]>
+	</select>
+
+	<update id="updatePasswordByEmpCode">
+   <![CDATA[
+      UPDATE Employee 
+      SET emp_password = #{new_emp_password}
+      WHERE emp_code = #{emp_code}
+   ]]>
+	</update>
+
+	<update id="resignationEmployee">
+   <![CDATA[
+         update employee set check_resignation='Y' 
+         where emp_code=#{emp_code} and emp_name=#{emp_name}
+         and emp_no=#{emp_no}
+   ]]>
+	</update>
+
+   <select id="selectEmployeeByBranchNo_forStore" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+    select employee.* from employee,branch
+   where 
+    branch_type_no=2 
+    and branch.branch_no = employee.branch_no 
+    and employee.rank_no <= 5
+    and employee.check_resignation='N'
+    and ((employee.branch_no = #{branch_no} and branch.branch_no = #{branch_no} ) or employee.emp_code not in(select employee.emp_code from employee,branch where branch.emp_code = employee.emp_code)) 
+   ]]>
+   </select>
+
+	
+	<select id="selectEmployeeByBranchNo_forFactory"
+		resultType="com.bt.vo.EmployeeVo">
+      <![CDATA[
+    select employee.* from employee,branch
+   where 
+    branch_type_no=3 
+    and branch.branch_no = employee.branch_no 
+    and employee.rank_no <= 5
+    and employee.check_resignation='N'
+    and ((employee.branch_no = #{branch_no} and branch.branch_no = #{branch_no} ) or employee.emp_code not in(select employee.emp_code from employee,branch where branch.emp_code = employee.emp_code)) 
+   ]]>
+	</select>
+
+	   <select id="selectEmployeeByBranchNo_forStore_AllList" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+    select employee.* from employee,branch
+   where employee.emp_code not in(select employee.emp_code from employee,branch where branch.emp_code = employee.emp_code) 
+    and branch_type_no=2
+    and branch.branch_no = employee.branch_no 
+    and employee.rank_no <= 5
+    and employee.check_resignation='N'
+    ]]>
+   </select>
+	
+   <select id="selectEmployeeByBranchNo_forFactory_AllList" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+    select employee.* from employee,branch
+   where employee.emp_code not in(select employee.emp_code from employee,branch where branch.emp_code = employee.emp_code) 
+    and branch_type_no=3
+    and branch.branch_no = employee.branch_no 
+    and employee.rank_no <= 5
+    and employee.check_resignation='N'
+    ]]>
+   </select>
+
+   <update id="modifyEmployee">
+   <![CDATA[
+         update employee set emp_name=#{emp_name},dept_no=#{dept_no},branch_no=#{branch_no},
+         rank_no=#{rank_no},emp_email=#{emp_email},emp_phone=#{emp_phone},emp_address=#{emp_address}
+         where emp_no=#{emp_no}
+   ]]>
+   </update>
+
+   <select id="selectByEmpCodeForStoreReservationPage" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+
+           select distinct employee.*  
+         from store_order_detail,store_order_reservation, employee, branch
+         where store_order_detail.store_order_res_code = store_order_reservation.store_order_res_code and 
+         employee.emp_code=#{emp_code} and employee.emp_code = branch.emp_code and branch.emp_code = store_order_reservation.emp_code
+         and store_order_reservation.emp_code = employee.emp_code
+      ]]>
+   </select>
+
+
+   <select id="getReservationInfo_paging" resultType="int">
+   <![CDATA[
+   select count(*) from (
+      select distinct store_order_reservation.*  
+         from store_order_detail,store_order_reservation, employee, branch
+         where store_order_detail.store_order_res_code = store_order_reservation.store_order_res_code and 
+         employee.emp_code=#{emp_code} and employee.emp_code = branch.emp_code and branch.emp_code = store_order_reservation.emp_code
+         and store_order_reservation.emp_code = employee.emp_code
+      ) 
+      ]]>
+   </select>
+
+
+   <select id="selectByEmpCodeForFactoryOrderPage" resultType="com.bt.vo.EmployeeVo">
+   <![CDATA[
+
+           select distinct employee.*  
+         from factory_order_detail,factory_order, employee, branch
+         
+         where 
+         factory_order_detail.factory_order_code = factory_order.factory_order_code and 
+         employee.emp_code=#{emp_code} and employee.emp_code = branch.emp_code and branch.emp_code = factory_order.emp_code
+         and factory_order.emp_code = employee.emp_code
+      ]]>
+   </select>
+   
+
+
+   <select id="getFactoryOrderInfo_paging" resultType="int">
+   <![CDATA[
+   select count(*) from (
+           select distinct factory_order.*  
+         from factory_order_detail,factory_order, employee, branch
+         
+         where 
+         factory_order_detail.factory_order_code = factory_order.factory_order_code and 
+         employee.emp_code=#{emp_code} and employee.emp_code = branch.emp_code and branch.emp_code = factory_order.emp_code
+         and factory_order.emp_code = employee.emp_code
+         )
+      ]]>
+   </select>
+	
+	<update id="modifyBranchNoForModifyStore">
+   <![CDATA[
+      update employee set branch_no=#{branch_no} where emp_code=#{emp_code}
+   ]]>
+   </update>
+   
+   <select id="selectCountByBranchNo" resultType="int">
+   <![CDATA[
+   select count(*) from employee where branch_no=#{branch_no} and emp_no!=0
+   and employee.check_resignation='N'
+      ]]>
+   </select>
+   
+   
+    <select id="getCountByMonth" resultType="Integer">
+   <![CDATA[
+   select COUNT(*) as cnt
+from employee 
+where TO_CHAR(start_date,'MM')=#{mon} and
+TO_CHAR(start_date,'yyyy') =  TO_CHAR(SYSDATE,'yyyy')
+group by TO_CHAR(start_date,'MM') 
+      ]]>
+   </select>
+   
+   
+   <update id="resignationMakeBranchNotoZeroEmployee">
+   <![CDATA[
+      UPDATE Employee 
+      SET branch_no = 0
+      WHERE emp_code = #{emp_code}
+   ]]>
+   </update>
+</mapper>

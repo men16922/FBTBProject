@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.StoreOrderReservationSQLMapper">
+
+<select id="selectByno"
+		resultType="com.bt.vo.StoreOrderReservationVo">
+	<![CDATA[
+		SELECT * FROM Store_order_reservation
+		WHERE store_order_res_code = #{store_order_res_code}
+	]]>
+	</select>
+	
+	<select id="getStoreOrderReservationInfo"
+      resultType="com.bt.vo.StoreOrderReservationVo">
+   <![CDATA[
+      SELECT *
+          FROM (
+            SELECT ROWNUM rnum, t1.*
+            FROM(
+           select distinct store_order_reservation.*  
+         from store_order_detail,store_order_reservation, employee, branch
+         where store_order_detail.store_order_res_code = store_order_reservation.store_order_res_code and 
+         employee.emp_code=#{emp_code} and employee.emp_code = branch.emp_code and branch.emp_code = store_order_reservation.emp_code
+         and store_order_reservation.emp_code = employee.emp_code
+         ) t1
+              ) t2
+          WHERE t2.rnum >= (#{curr_page}-1)*10+1 AND t2.rnum <= #{curr_page}*10
+   ]]>
+   </select>
+</mapper>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.FactoryInItemSQLMapper">
+   
+   <select id="createKey" resultType="int">
+      SELECT
+      Factory_in_item_seq.nextval
+      FROM DUAL
+   </select>
+   
+   <select id="selectAll"
+      resultType="com.bt.production.vo.FactoryInItemVo">
+      <!-- 단일 값은 변수명으로 넣음. 컬럼명 아님 -->
+   <![CDATA[
+      SELECT * FROM(
+    SELECT ROWNUM rnum, t1.* FROM (]]>
+            SELECT
+         f.factory_in_item_code,
+         f.factory_order_detail_no,
+         d.comp_no,
+         c.comp_name,
+         f.factory_in_item_qty,
+         c.comp_price,
+         d.supplier_no,
+         s.supplier_name,
+         f.factory_in_item_date,
+         f.emp_code,
+         e.branch_no
+      FROM Factory_in_item f, Employee e, Branch b, Factory_order_detail d, Product_component c, Supplier s
+      WHERE f.emp_code = e.emp_code
+      AND b.branch_no = e.branch_no
+      AND d.factory_order_detail_no = f.factory_order_detail_no
+      AND c.comp_no = d.comp_no
+      AND d.supplier_no = s.supplier_no
+      AND b.branch_no = #{branch_no}
+      AND d.check_approval = 'Y'
+      <if test="sort == 0">
+      ORDER BY factory_in_item_code DESC
+      </if>
+      <if test="sort == 1">
+      ORDER BY comp_name ASC
+      </if>
+      <if test="sort == 2">
+      ORDER BY factory_in_item_qty DESC
+      </if>
+      <if test="sort == 3">
+      ORDER BY comp_price ASC
+      </if>
+      <if test="sort == 4">
+      ORDER BY comp_price DESC
+      </if>
+      <if test="sort == 5">
+      ORDER BY factory_in_item_date DESC
+      </if>
+      ) t1 ) t2
+        <![CDATA[
+        WHERE t2.rnum >= (#{currPage}-1)*5+1 AND t2.rnum <= #{currPage}*5
+      ]]>
+   </select>
+   
+   <insert id="insert">
+   <![CDATA[
+      INSERT INTO Factory_in_item
+      VALUES(
+      Factory_in_item_seq.nextval,
+      #{factory_order_detail_no},
+      #{factory_in_item_qty},
+      #{emp_code},
+      SYSDATE
+      )
+   ]]>
+   </insert>
+   
+   <select id="selectInItem"
+      resultType="com.bt.production.vo.FactoryInItemVo">
+      SELECT * FROM(
+             SELECT ROWNUM r, t1.* FROM(
+              SELECT
+               f.factory_in_item_code,
+               f.factory_order_detail_no,
+               d.comp_no,
+               c.comp_name,
+               f.factory_in_item_qty,
+               c.comp_price,
+               f.factory_in_item_date,
+               f.emp_code,
+               e.emp_name,
+               d.supplier_no,
+               s.supplier_name
+            FROM Factory_in_item f, Factory_order_detail d, Product_component c, Supplier s, Employee e, Branch b
+            WHERE f.factory_order_detail_no = d.factory_order_detail_no
+            AND d.comp_no = c.comp_no
+            AND s.supplier_no = d.supplier_no
+            AND f.emp_code = e.emp_code
+            AND e.branch_no = b.branch_no
+            AND b.branch_no = #{branch_no}
+            <if test="factory_in_item_code != 0">
+            AND f.factory_in_item_code = #{factory_in_item_code}
+            </if>
+            <if test="comp_no != 0">
+            AND d.comp_no = #{comp_no}
+            </if>
+            <if test="start_date != null and end_date != null">
+            AND f.factory_in_item_date BETWEEN TO_DATE(#{start_date},'YYYY-MM-DD') AND TO_DATE(#{end_date},'YYYY-MM-DD') 
+            </if>
+            <if test="emp_code != 0">
+            AND f.emp_code = #{emp_code}
+            </if>
+            <if test="supplier_no != 0">
+            AND d.supplier_no = #{supplier_no}
+            </if>
+              <if test="sort == 0">
+            ORDER BY factory_in_item_code DESC
+            </if>
+            <if test="sort == 1">
+            ORDER BY comp_name ASC
+            </if>
+            <if test="sort == 2">
+            ORDER BY factory_in_item_qty DESC
+            </if>
+            <if test="sort == 3">
+            ORDER BY comp_price ASC
+            </if>
+            <if test="sort == 4">
+            ORDER BY comp_price DESC
+            </if>
+            <if test="sort == 5">
+            ORDER BY factory_in_item_date DESC
+            </if>
+            ) t1) t2
+              <![CDATA[
+              WHERE t2.r >= (#{currPage}-1)*5+1 AND t2.r <= #{currPage}*5
+              ]]>
+   </select>
+   
+   <select id="selectAllCount"
+      resultType="int">
+      <!-- 단일 값은 변수명으로 넣음. 컬럼명 아님 -->
+   <![CDATA[
+      SELECT COUNT(*) FROM Factory_in_item f, Employee e, Branch b
+      WHERE f.emp_code = e.emp_code
+         AND e.branch_no = b.branch_no
+         AND e.branch_no = #{branch_no}
+   ]]>
+   </select>
+   
+   <select id="selectSearchCount"
+      resultType="int">
+      <!-- 단일 값은 변수명으로 넣음. 컬럼명 아님 -->
+      SELECT COUNT(*)
+      FROM Factory_in_item f, Factory_order_detail d, Product_component c, Supplier s, Employee e, Branch b
+            WHERE f.factory_order_detail_no = d.factory_order_detail_no
+            AND d.comp_no = c.comp_no
+            AND s.supplier_no = d.supplier_no
+            AND f.emp_code = e.emp_code
+            AND e.branch_no = b.branch_no
+            AND b.branch_no = #{branch_no}
+            <if test="factory_in_item_code != 0">
+            AND f.factory_in_item_code = #{factory_in_item_code}
+            </if>
+            <if test="comp_no != 0">
+            AND d.comp_no = #{comp_no}
+            </if>
+            <if test="start_date != null and end_date != null">
+            AND f.factory_in_item_date BETWEEN #{start_date} AND #{end_date}
+            </if>
+            <if test="emp_code != 0">
+            AND f.emp_code = #{emp_code}
+            </if>
+            <if test="supplier_no != 0">
+            AND d.supplier_no = #{supplier_no}
+            </if>
+              ORDER BY f.factory_in_item_code DESC
+   </select>
+   
+</mapper>

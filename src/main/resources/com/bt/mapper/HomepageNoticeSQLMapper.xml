@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.HomepageNoticeSQLMapper">
+
+   
+  
+   
+   <select id="getHomepageNotice" resultType="com.bt.vo.HomepageNoticeVo">   
+   <![CDATA[
+      select * from Homepage_notice where hp_notice_type_no = #{hp_notice_type_no}
+    ]]>
+   </select>
+   
+      <update id="homepageNotice_modify_process">   
+   <![CDATA[
+      update Homepage_notice set 
+      
+      hp_notice_type_no=#{hp_notice_type_no},
+      hp_notice_title=#{hp_notice_title},
+      hp_notice_writedate=SYSDATE,
+      hp_notice_content=#{hp_notice_content}
+      where
+      hp_notice_type_no = #{hp_notice_type_no}
+      
+    ]]>
+   </update>
+</mapper>

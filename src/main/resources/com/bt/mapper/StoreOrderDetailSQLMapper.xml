@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.StoreOrderDetailSQLMapper">
+
+   <select id="detailList"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+   <![CDATA[
+      SELECT
+         d.store_order_detail_no, 
+         p.product_name, 
+         m.confirm_qty, 
+         d.store_order_generating_time,
+         s.process_no,
+         d.product_no,
+         p.product_no,
+         l.process_name,
+            t2.branch_name,
+            d.store_order_res_code
+      FROM 
+        (SELECT
+         b.branch_no,
+         b.branch_name,
+         t1.store_order_detail_no
+      FROM
+         (SELECT store_order_detail_no
+         FROM Process_status
+         WHERE flag = 'Y'
+         GROUP BY store_order_detail_no
+         HAVING MAX(process_no) = 3) t1, Store_order_detail d, Store_order_reservation r, Employee e, Branch b
+      WHERE d.store_order_res_code = r.store_order_res_code
+      AND t1.store_order_detail_no = d.store_order_detail_no
+      AND e.emp_code = r.emp_code
+      AND b.branch_no = e.branch_no) t2,
+        Store_Order_detail d, Process_status s, Product p, Process_management m, Branch b, Process_list l
+      WHERE d.store_order_detail_no = t2.store_order_detail_no
+      AND p.product_no = d.product_no
+      AND m.branch_no = b.branch_no
+      AND s.store_order_detail_no = d.store_order_detail_no
+      AND m.store_order_detail_no = d.store_order_detail_no
+      AND l.process_no = s.process_no
+      AND flag = 'Y'
+        AND s.process_no = 3
+        AND b.branch_no = #{branch_no}
+      AND d.store_order_detail_no IN (
+         SELECT store_order_detail_no
+         FROM Process_status
+            GROUP BY store_order_detail_no
+            HAVING MAX(process_no) = 3)
+   ]]>
+   </select>
+
+   <select id="readyDelivery"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+   <![CDATA[
+      SELECT
+         d.store_order_detail_no, 
+         p.product_name, 
+         m.confirm_qty, 
+         d.store_order_generating_time,
+         s.process_no,
+         d.product_no,
+         p.product_no,
+         l.process_name,
+            t2.branch_name,
+            d.store_order_res_code
+      FROM 
+        (SELECT
+         b.branch_no,
+         b.branch_name,
+         t1.store_order_detail_no
+      FROM
+         (SELECT store_order_detail_no
+         FROM Process_status
+         WHERE flag = 'Y'
+         GROUP BY store_order_detail_no
+         HAVING MAX(process_no) = 4) t1, Store_order_detail d, Store_order_reservation r, Employee e, Branch b
+      WHERE d.store_order_res_code = r.store_order_res_code
+      AND t1.store_order_detail_no = d.store_order_detail_no
+      AND e.emp_code = r.emp_code
+      AND b.branch_no = e.branch_no) t2,
+        Store_Order_detail d, Process_status s, Product p, Process_management m, Branch b, Process_list l
+      WHERE d.store_order_detail_no = t2.store_order_detail_no
+      AND p.product_no = d.product_no
+      AND m.branch_no = b.branch_no
+      AND s.store_order_detail_no = d.store_order_detail_no
+      AND m.store_order_detail_no = d.store_order_detail_no
+      AND l.process_no = s.process_no
+      AND flag = 'Y'
+        AND s.process_no = 4
+        AND b.branch_no = #{branch_no}
+      AND d.store_order_detail_no IN (
+         SELECT store_order_detail_no
+         FROM Process_status
+            GROUP BY store_order_detail_no
+            HAVING MAX(process_no) = 4)
+   ]]>
+   </select>
+   
+   <select id="selectByno"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+   <![CDATA[
+      SELECT * FROM Store_order_detail
+      WHERE store_order_res_code = #{store_order_res_code}
+   ]]>
+   </select>
+   
+   <select id="getEnroll"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+   <![CDATA[
+      SELECT
+         d.store_order_detail_no, 
+         p.product_name, 
+         m.confirm_qty, 
+         d.store_order_generating_time,
+         s.process_no,
+         d.product_no,
+         p.product_no,
+         l.process_name,
+            t2.branch_name,
+            d.store_order_res_code
+      FROM 
+        (SELECT
+         b.branch_no,
+         b.branch_name,
+         t1.store_order_detail_no
+      FROM
+         (SELECT store_order_detail_no
+         FROM Process_status
+         WHERE flag = 'Y'
+         GROUP BY store_order_detail_no
+         HAVING MAX(process_no) = 4) t1, Store_order_detail d, Store_order_reservation r, Employee e, Branch b
+      WHERE d.store_order_res_code = r.store_order_res_code
+      AND t1.store_order_detail_no = d.store_order_detail_no
+      AND e.emp_code = r.emp_code
+      AND b.branch_no = e.branch_no) t2,
+        Store_Order_detail d, Process_status s, Product p, Process_management m, Branch b, Process_list l
+      WHERE d.store_order_detail_no = t2.store_order_detail_no
+      AND p.product_no = d.product_no
+      AND m.branch_no = b.branch_no
+      AND s.store_order_detail_no = d.store_order_detail_no
+      AND m.store_order_detail_no = d.store_order_detail_no
+      AND l.process_no = s.process_no
+      AND flag = 'Y'
+        AND s.process_no = 4
+        AND b.branch_no = #{branch_no}
+      AND d.store_order_detail_no IN (
+         SELECT store_order_detail_no
+         FROM Process_status
+            GROUP BY store_order_detail_no
+            HAVING MAX(process_no) = 4)
+        AND d.store_order_detail_no = #{store_order_detail_no}
+   ]]>
+   </select>
+   
+   <select id="selectBySodn"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+   <![CDATA[
+      SELECT * FROM Store_order_detail
+      WHERE store_order_detail_no = #{store_order_detail_no}
+   ]]>
+   </select>
+   
+   <select id="selectAllOrder"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+      <![CDATA[
+      SELECT * FROM(
+    		SELECT ROWNUM rnum, t2.* FROM (]]>
+         SELECT DISTINCT
+         d.store_order_res_code,
+         r.store_order_res_no,
+         t1.branch_name,
+         t1.branch_no,
+         r.store_order_res_date,
+         r.emp_code
+      FROM Process_management m, Store_order_detail d, Store_order_reservation r, (
+         SELECT
+            m.branch_no,
+            b.branch_name,
+            r.store_order_res_code
+         FROM Store_order_reservation r, Store_order_detail d, Process_management m, Employee e, Branch b
+         WHERE r.store_order_res_code = d.store_order_res_code
+         AND d.store_order_detail_no = m.store_order_detail_no
+         AND r.emp_code = e.emp_code
+         AND e.branch_no = b.branch_no
+         AND m.branch_no = #{branch_no}) t1
+		WHERE m.store_order_detail_no = d.store_order_detail_no
+		AND d.store_order_res_code = r.store_order_res_code
+		AND t1.store_order_res_code = d.store_order_res_code
+		AND m.branch_no = #{branch_no}
+		<if test="store_order_res_no != null">
+        AND store_order_res_no = #{store_order_res_no}
+        </if>
+        <if test="branch_name != null">
+        AND branch_name = #{branch_name}
+        </if>
+        <if test="start_date != null and end_date != null">
+        AND store_order_res_date BETWEEN TO_DATE(#{start_date},'YYYY-MM-DD') AND TO_DATE(#{end_date},'YYYY-MM-DD') 
+        </if>
+		ORDER BY r.store_order_res_no DESC
+		) t2 ) t3
+        <![CDATA[
+        WHERE t3.rnum >= (#{currPage}-1)*5+1 AND t3.rnum <= #{currPage}*5
+      ]]>
+   </select>
+   
+   <select id="selectBySORC"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+         SELECT 
+	      r.store_order_res_no,
+	      d.store_order_detail_no,
+	      r.store_order_res_code,
+	      r.emp_code,
+	      d.product_no,
+	      m.confirm_qty,
+	      p.product_name,
+	      t1.branch_name,
+	      m.end_emp_code,
+	      e.emp_name
+		FROM Process_management m , Store_order_detail d, Store_order_reservation r, Product p, Employee e, (
+		SELECT
+		m.branch_no,
+		b.branch_name,
+		d.store_order_detail_no
+		FROM Store_order_reservation r, Store_order_detail d, Process_management m, Employee e, Branch b
+		WHERE r.store_order_res_code = d.store_order_res_code
+		AND d.store_order_detail_no = m.store_order_detail_no
+		AND r.emp_code = e.emp_code
+		AND e.branch_no = b.branch_no
+		AND m.branch_no = #{branch_no}) t1
+		WHERE m.store_order_detail_no = d.store_order_detail_no
+		AND d.store_order_res_code = r.store_order_res_code
+		AND d.product_no = p.product_no
+		AND d.store_order_detail_no = t1.store_order_detail_no
+		AND m.end_emp_code = e.emp_code
+		AND m.branch_no = #{branch_no}
+		AND r.store_order_res_code = #{store_order_res_code}
+		ORDER BY store_order_detail_no DESC
+   </select>
+   
+   <select id="getAllCount" resultType="int">
+         SELECT COUNT(DISTINCT r.store_order_res_no)
+      FROM Process_management m, Store_order_detail d, Store_order_reservation r, (
+         SELECT
+            m.branch_no,
+            b.branch_name,
+            r.store_order_res_code
+         FROM Store_order_reservation r, Store_order_detail d, Process_management m, Employee e, Branch b
+         WHERE r.store_order_res_code = d.store_order_res_code
+         AND d.store_order_detail_no = m.store_order_detail_no
+         AND r.emp_code = e.emp_code
+         AND e.branch_no = b.branch_no
+         AND m.branch_no = 5) t1
+		WHERE m.store_order_detail_no = d.store_order_detail_no
+		AND d.store_order_res_code = r.store_order_res_code
+		AND t1.store_order_res_code = d.store_order_res_code
+		AND m.branch_no = #{branch_no}
+		ORDER BY r.store_order_res_no DESC
+   </select>
+   
+   <select id="getSelectCount" resultType="int">
+   	SELECT COUNT(DISTINCT r.store_order_res_no)
+      FROM Process_management m, Store_order_detail d, Store_order_reservation r, (
+         SELECT
+            m.branch_no,
+            b.branch_name,
+            r.store_order_res_code
+         FROM Store_order_reservation r, Store_order_detail d, Process_management m, Employee e, Branch b
+         WHERE r.store_order_res_code = d.store_order_res_code
+         AND d.store_order_detail_no = m.store_order_detail_no
+         AND r.emp_code = e.emp_code
+         AND e.branch_no = b.branch_no
+         AND m.branch_no = #{branch_no}) t1
+		WHERE m.store_order_detail_no = d.store_order_detail_no
+		AND d.store_order_res_code = r.store_order_res_code
+		AND t1.store_order_res_code = d.store_order_res_code
+		AND m.branch_no = #{branch_no}
+		<if test="store_order_res_no != null">
+        AND store_order_res_no = #{store_order_res_no}
+        </if>
+        <if test="branch_name != null">
+        AND branch_name = #{branch_name}
+        </if>
+        <if test="start_date != null and end_date != null">
+        AND store_order_res_date BETWEEN TO_DATE(#{start_date},'YYYY-MM-DD') AND TO_DATE(#{end_date},'YYYY-MM-DD') 
+        </if>
+		ORDER BY r.store_order_res_no DESC
+   </select>
+   
+    <select id="getRequestCount" resultType="int">
+        SELECT
+        COUNT(*)
+      FROM 
+        (SELECT
+         b.branch_no,
+         b.branch_name,
+         t1.store_order_detail_no
+      FROM
+         (SELECT store_order_detail_no
+         FROM Process_status
+         WHERE flag = 'Y'
+         GROUP BY store_order_detail_no
+         HAVING MAX(process_no) = 3) t1, Store_order_detail d, Store_order_reservation r, Employee e, Branch b
+      WHERE d.store_order_res_code = r.store_order_res_code
+      AND t1.store_order_detail_no = d.store_order_detail_no
+      AND e.emp_code = r.emp_code
+      AND b.branch_no = e.branch_no) t2,
+        Store_Order_detail d, Process_status s, Product p, Process_management m, Branch b, Process_list l
+      WHERE d.store_order_detail_no = t2.store_order_detail_no
+      AND p.product_no = d.product_no
+      AND m.branch_no = b.branch_no
+      AND s.store_order_detail_no = d.store_order_detail_no
+      AND m.store_order_detail_no = d.store_order_detail_no
+      AND l.process_no = s.process_no
+      AND flag = 'Y'
+        AND s.process_no = 3
+        AND b.branch_no = #{branch_no}
+      AND d.store_order_detail_no IN (
+         SELECT store_order_detail_no
+         FROM Process_status
+            GROUP BY store_order_detail_no
+            HAVING MAX(process_no) = 3)
+   </select>
+   
+   <select id="getreadyCount" resultType="int">
+        SELECT
+       COUNT(*)
+      FROM 
+        (SELECT
+         b.branch_no,
+         b.branch_name,
+         t1.store_order_detail_no
+      FROM
+         (SELECT store_order_detail_no
+         FROM Process_status
+         WHERE flag = 'Y'
+         GROUP BY store_order_detail_no
+         HAVING MAX(process_no) = 4) t1, Store_order_detail d, Store_order_reservation r, Employee e, Branch b
+      WHERE d.store_order_res_code = r.store_order_res_code
+      AND t1.store_order_detail_no = d.store_order_detail_no
+      AND e.emp_code = r.emp_code
+      AND b.branch_no = e.branch_no) t2,
+        Store_Order_detail d, Process_status s, Product p, Process_management m, Branch b, Process_list l
+      WHERE d.store_order_detail_no = t2.store_order_detail_no
+      AND p.product_no = d.product_no
+      AND m.branch_no = b.branch_no
+      AND s.store_order_detail_no = d.store_order_detail_no
+      AND m.store_order_detail_no = d.store_order_detail_no
+      AND l.process_no = s.process_no
+      AND flag = 'Y'
+        AND s.process_no = 4
+        AND b.branch_no = #{branch_no}
+      AND d.store_order_detail_no IN (
+         SELECT store_order_detail_no
+         FROM Process_status
+            GROUP BY store_order_detail_no
+            HAVING MAX(process_no) = 4)
+   </select>
+   
+</mapper>

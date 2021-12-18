@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.DepartmentFileSQLMapper">
+	
+	<select id="createKey" resultType="int">
+		SELECT Department_file_seq.nextval
+		FROM DUAL
+	</select>
+	
+	<insert id="insert">
+	<![CDATA[
+		INSERT INTO Department_file
+		VALUES(
+		#{dept_file_no},
+		#{dept_board_no},
+		#{dept_file_link_path},
+		#{dept_file_real_path},
+		SYSDATE
+		)
+	]]>
+	</insert>
+	
+	<select id="selectByBoardNo" resultType="com.bt.vo.DepartmentFileVo">
+		<![CDATA[
+			SELECT * 
+			FROM Department_file
+			WHERE dept_board_no = #{dept_board_no}
+		]]>
+	</select>
+	
+	<delete id="deletebyboardno">
+		delete from Department_file
+		where dept_board_no = #{dept_board_no}
+	</delete>
+</mapper>

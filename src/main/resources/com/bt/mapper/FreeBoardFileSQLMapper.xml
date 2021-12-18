@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.FreeBoardFileSQLMapper">
+  
+   <select id="createFreeBoardFileKey" resultType="int">
+      SELECT Freeboard_file_seq.nextval
+      FROM DUAL
+   </select>
+   
+   <insert id="insertFreeBoardFile">
+   <![CDATA[
+      INSERT INTO Freeboard_file
+      VALUES(
+      #{freeboard_file_no},
+      #{freeboard_no},
+      #{freeboard_file_link_path},
+      #{freeboard_file_real_path},
+      SYSDATE
+      )
+   ]]>
+   </insert>
+   
+   <select id="selectByFreeBoardNo" resultType="com.bt.vo.FreeBoardFileVo">
+      <![CDATA[
+         SELECT * 
+         FROM Freeboard_file
+         WHERE freeboard_no = #{freeboard_no}
+      ]]>
+   </select>
+
+	<delete id="deletebyboardno">
+		delete from Freeboard_file
+		where freeboard_no = #{freeboard_no}
+	</delete>
+
+
+</mapper>

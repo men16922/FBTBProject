@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.FreeBoardReplySQLMapper">
+
+	<select id="replyCreatekey" resultType="int">
+	  SELECT
+      Freeboard_reply_seq.nextval FROM DUAL
+	</select>
+	
+	<select id="getempcodebyreplyno" resultType="int">
+   <![CDATA[      
+      SELECT emp_code
+      FROM freeboard_reply
+      where freeboard_reply_no=#{freeboard_reply_no}
+      
+   ]]>
+   </select>
+	
+	<insert id="insert">
+		insert into 
+		Freeboard_reply 
+		values
+		(#{freeboard_reply_no},#{freeboard_no},#{freeboard_reply_content},#{emp_code},SYSDATE)
+	</insert>
+
+	<select id="selectByBoardNo" resultType="com.bt.vo.FreeBoardReplyVo">
+		select * from freeboard_reply where freeboard_no=#{freeboard_no}
+	</select>
+	
+	<delete id="delete">
+		delete from
+		freeboard_reply
+		where freeboard_reply_no=#{freeboard_reply_no}
+	</delete>
+	
+	<update id="update">
+		update
+		freeboard_reply
+		set
+		freeboard_reply_content=#{freeboard_reply_content}
+		where
+		freeboard_reply_no=#{freeboard_reply_no}
+	
+	</update>
+   
+</mapper>

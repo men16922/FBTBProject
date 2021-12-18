@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.ProcessStatusSQLMapper">
+	
+	<select id="createKey"
+		resultType="int">
+	<![CDATA[
+		SELECT Process_status_seq.nextval
+		FROM DUAL
+	]]>
+	</select>
+	
+	<select id="selectByODn"
+		resultType="com.bt.vo.ProcessStatusVo">
+	<![CDATA[
+		SELECT * FROM Process_status 
+		WHERE store_order_detail_no = #{store_order_detail_no}
+		AND process_no = 3
+		AND flag = 'Y'
+	]]>
+	</select>
+	
+	<select id="selectPn"
+		resultType="int">
+	<![CDATA[
+		SELECT store_order_detail_no FROM Process_status
+		WHERE store_order_detail_no = #{store_order_detail_no}
+		GROUP BY store_order_detail_no
+		HAVING MAX(process_no) = 3
+	]]>
+	</select>
+	
+	<insert id="insert">
+	<![CDATA[
+		INSERT INTO Process_status 
+		VALUES(
+		process_status_seq.nextval, 
+		#{store_order_detail_no}, 
+		4,
+		SYSDATE, 
+		'Y'
+		)
+	]]>
+	</insert>
+	
+	<select id="getProcessNo"
+		resultType="com.bt.vo.ProcessStatusVo">
+	<![CDATA[
+		SELECT * FROM Process_status
+		WHERE store_order_detail_no = #{store_order_detail_no}
+		AND process_no = 4
+
+	]]>
+	</select>
+	
+	<insert id="insertDelivery">
+	<![CDATA[
+		INSERT INTO Process_status 
+		VALUES(
+		process_status_seq.nextval, 
+		#{store_order_detail_no}, 
+		5,
+		SYSDATE, 
+		'Y'
+		)
+	]]>
+	</insert>
+	
+	<update id="reject">
+	<![CDATA[
+		UPDATE Process_status 
+		SET flag = 'R' 
+		WHERE store_order_detail_no = #{store_order_detail_no} AND process_no = 3 AND flag='Y'
+	]]>
+	</update>
+	
+	<select id="selectBySodn"
+		resultType="com.bt.vo.ProcessStatusVo">
+		SELECT 
+			d.store_order_detail_no,
+			l.process_name,
+			s.process_no,
+			s.flag,
+			s.confirm_date
+FROM Store_order_detail d, Process_status s, Process_list l
+WHERE d.store_order_detail_no = s.store_order_detail_no
+AND s.process_no = l.process_no
+AND d.store_order_detail_no = #{store_order_detail_no}
+ORDER BY s.process_no DESC
+	</select>
+</mapper>

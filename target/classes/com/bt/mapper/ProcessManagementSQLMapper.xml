@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.ProcessManagementSQLMapper">
+
+   <select id="selectByDn" resultType="com.bt.vo.ProcessManagementVo">
+      SELECT * FROM Process_management WHERE store_order_detail_no = #{store_order_detail_no}
+   </select>
+   
+   <select id="getReservationDetailInfo" resultType="com.bt.vo.ProcessManagementVo">
+ <![CDATA[ select
+            process_management.*
+            from 
+            product,store_order_detail,process_management,branch,employee,store_order_reservation
+            where
+            product.product_no = store_order_detail.product_no
+            and
+            process_management.store_order_detail_no = store_order_detail.store_order_detail_no
+            and
+            process_management.branch_no = branch.branch_no 
+            and 
+            store_order_reservation.emp_code = employee.emp_code
+            and
+            store_order_reservation.store_order_res_code = store_order_detail.store_order_res_code
+            
+            and
+            store_order_reservation.emp_code = #{emp_code}
+            and
+            store_order_reservation.store_order_res_no = #{store_order_res_no}
+            ]]>
+   </select>
+</mapper>

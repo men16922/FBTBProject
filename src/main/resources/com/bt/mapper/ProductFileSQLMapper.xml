@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.ProductFileSQLMapper">
+
+	
+	<select id="insert">
+	<![CDATA[
+		INSERT INTO product_file
+		VALUES(
+			product_file_no_seq.nextval, 
+			#{product_no}, 
+			#{product_file_link_path}, 
+			#{product_file_real_path}, 
+			SYSDATE
+		)
+	]]>
+	</select>
+	<delete id="delete">
+	<![CDATA[
+		delete product_file where product_no = #{product_no}
+	]]>
+	
+	</delete>
+	<update id="modify">
+	<![CDATA[
+		update product_file set
+		product_file_link_path = #{product_file_link_path},
+		product_file_real_path = #{product_file_real_path}
+		where product_no = #{product_no}
+	]]>
+	</update>
+	
+	<!-- 업로드된 파일 읽어오기 -->
+	<select id="selectByProductNo" resultType="com.bt.vo.ProductFileVo">
+	<![CDATA[
+		SELECT * 
+		FROM product_file
+		WHERE product_no=#{product_no}
+	]]>
+	</select>
+	
+	
+	
+</mapper>

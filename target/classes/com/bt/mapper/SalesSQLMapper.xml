@@ -1,0 +1,1594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.SalesSQLMapper">
+   
+   <select id="countreservation" resultType="int">
+	select count(*) from customer_reservation_list
+	where order_status_no=1
+   </select>
+   
+   <select id="createbranchstockKey" resultType="int">
+      SELECT
+      branch_stock_seq.NEXTVAL FROM DUAL
+   </select>
+   
+   <select id="createcustomerKey" resultType="int">
+      SELECT
+      CUSTOMER_SEQ.NEXTVAL FROM DUAL
+   </select>
+
+   <select id="createcustomerReservationKey" resultType="int">
+      SELECT
+      CUSTOMER_RESERVATION_SEQ.NEXTVAL FROM DUAL
+   </select>
+
+   <select id="createstoreorderdetailreservationKey"
+      resultType="int">
+      select store_order_detail_seq.nextval from dual
+   </select>
+
+   <select id="createstoreorderreservationKey" resultType="int">
+      select
+      store_order_reservation_seq.nextval from dual
+   </select>
+   
+   <select id="createstoreoutitemKey" resultType="int">
+      select
+      store_out_item_seq.nextval from dual
+   </select>
+   
+   <select id="createstoreinitemkey" resultType="int">
+      select
+      store_in_item_seq.nextval from dual
+   </select>
+   
+   <select id="createrescodekey" resultType="int">
+        select
+        store_order_reservation_seq.nextval from dual
+   </select>
+
+   
+   <select id="getcustomername" resultType="String">
+      select
+      customer_name
+      from customer
+      where customer_no=#{customer_no}
+   </select>
+   
+   <select id="selectqty" resultType="String">
+   	  select customer_res_qty from customer_reservation_list where res_no=#{res_no}
+   </select>
+   
+   <select id="selectproductnofromcus" resultType="String">
+   	  select product_no from customer_reservation_list where res_no=#{res_no}
+   </select>
+   
+   <select id="getallProductcount" resultType="int">
+      select count(*) from product
+      where product_no is not null
+      <if test="product_type_no!=null">
+         AND PRODUCT_TYPE_NO = #{product_type_no}
+      </if>
+      <if test="product_no!=null">
+         AND product_no = #{product_no}
+      </if>
+      <if test="product_name!=null">
+         AND product_name LIKE '%' || #{product_name} || '%'
+      </if>
+      
+   </select>
+   
+   <select id="selectprotype" resultType="int">
+      SELECT distinct product_type_no from(SELECT *
+      FROM PRODUCT A, BRANCH_STOCK B
+      WHERE a.product_no=b.product_no
+      AND b.branch_no=#{branch_no}
+      ) order by product_type_no
+   </select>
+   
+   <select id="storeinviewcount" resultType="int">
+       SELECT count(*)
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      b.store_in_item_no,b.product_no,b.in_item_qty,b.emp_code,b.in_item_date
+      FROM PRODUCT A, STORE_IN_ITEM B, EMPLOYEE C, BRANCH D
+      WHERE A.PRODUCT_NO=B.PRODUCT_NO
+      AND b.emp_code=c.emp_code
+      AND c.branch_no=d.branch_no
+      AND d.branch_no=#{branch_no}
+      <if test="store_in_item_no!=0">
+         AND b.store_in_item_no=#{store_in_item_no}
+      </if>
+      <if test="product_name!=null">
+         AND a.product_name=#{product_name}
+      </if>
+      <if test="emp_name!=null">
+         AND c.emp_name=#{emp_name}
+      </if>
+      <if test="in_start_date!=null and in_final_date!=null">
+      AND b.in_item_date BETWEEN TO_DATE(#{in_start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{in_final_date},'YYYY-MM-DD')
+    
+      </if>
+        ) t1
+      ) t2
+   
+     
+   </select>
+   
+   <select id="storeincount" resultType="int">
+       SELECT count(*) 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+          
+             SELECT a.*
+             from Store_order_detail a, STORE_ORDER_RESERVATION b, Process_status c, Process_Management d, product e
+             where a.store_order_res_code=b.store_order_res_code
+             and a.store_order_detail_no=c.store_order_detail_no
+             and c.store_order_detail_no=d.store_order_detail_no
+             and c.process_no=5
+             and e.product_no=a.product_no
+             and c.store_order_detail_no in
+                (SELECT store_order_detail_no
+                FROM Process_status
+                GROUP BY store_order_detail_no
+                HAVING MAX(process_no) = 5)
+             and c.flag='Y'
+             and b.emp_code in (SELECT distinct(a.emp_code) FROM EMPLOYEE A, STORE_ORDER_RESERVATION B, BRANCH C
+            WHERE A.EMP_CODE=B.EMP_CODE
+            AND A.BRANCH_NO=C.BRANCH_NO
+            AND c.branch_no=#{branch_no})
+        
+              ) t1
+             ) t2
+   
+     
+   </select>
+   
+   <select id="storeoutviewcount"
+      resultType="int">
+
+      SELECT count(*)
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      b.store_out_item_no,b.product_no,b.out_item_qty,b.emp_code,b.out_item_date
+      FROM PRODUCT A, STORE_OUT_ITEM B, EMPLOYEE C, BRANCH D
+      WHERE A.PRODUCT_NO=B.PRODUCT_NO
+      AND b.emp_code=c.emp_code
+      AND c.branch_no=d.branch_no
+      AND d.branch_no=#{branch_no}
+      <if test="store_out_item_no!=0">
+         AND b.store_out_item_no=#{store_out_item_no}
+      </if>
+      <if test="product_name!=null">
+         AND a.product_name=#{product_name}
+      </if>
+      <if test="out_start_date!=null and out_final_date!=null">
+        AND b.out_item_date BETWEEN TO_DATE(#{out_start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{out_final_date},'YYYY-MM-DD')
+
+      </if>
+      <if test="emp_name!=null">
+         AND c.emp_name LIKE '%' || #{emp_name} || '%'
+      </if>
+      
+            
+      ) t1
+      ) t2
+
+   </select>
+   
+   <select id="customerviewcount"
+      resultType="int">
+
+      SELECT count(*)
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT *
+      FROM
+      CUSTOMER
+      WHERE CUSTOMER_CODE IS NOT NULL
+      <if test="customer_name!=null">
+         AND customer_name LIKE '%' || #{customer_name} || '%'
+      </if>
+      <if test="customer_phone!=null">
+         AND customer_phone LIKE '%' || #{customer_phone} || '%'
+      </if>
+       
+   
+      
+      ) t1
+      ) t2
+
+   </select>
+   
+   
+   <select id="customerreservationviewcount"
+      resultType="int">
+
+      SELECT count(*)
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      a.res_no,a.order_status_no,a.product_no,a.customer_res_qty,a.emp_code,a.customer_no,a.customer_res_date
+      FROM
+      Customer_reservation_list A, Customer B, Reservation_status C, Product D
+      WHERE a.customer_no=b.customer_no
+      AND a.order_status_no=c.res_status_no
+      AND a.product_no= d.product_no
+      <if test="order_status_no!=0">
+         AND a.order_status_no=#{order_status_no}
+      </if>
+      <if test="customer_name!=null">
+         AND b.customer_name=#{customer_name}
+      </if>
+     
+      
+      ) t1
+      ) t2
+
+   </select>
+   
+   
+   <select id="storeorderviewcount"
+   resultType="int">
+      
+         SELECT count(*)
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+        a.*
+      FROM
+      Store_order_reservation A, Branch D, Employee
+      E
+      where a.emp_code=e.emp_code
+      AND d.branch_no=e.branch_no
+      AND d.branch_no=#{branch_no}
+      
+      <if test="store_order_res_no!=null">
+         AND a.store_order_res_no Like '%' || #{store_order_res_no} || '%'
+      </if>
+      <if test="emp_name!=null">
+         AND e.emp_name LIKE '%' || #{emp_name} || '%'
+
+      </if>
+      <if
+         test="store_order_start_date!=null and store_order_final_date!=null">
+         AND a.store_order_res_date BETWEEN TO_DATE(#{store_order_start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{store_order_final_date},'YYYY-MM-DD')
+       
+      </if>
+      
+
+      ) t1
+      ) t2
+  
+   
+   </select>
+   
+   
+   
+    <insert id="insertBranchStock">
+      INSERT INTO
+      branch_stock
+      VALUES
+      (#{branch_stock_key},#{branch_no},#{product_no},0)
+   </insert>
+   
+   <insert id="insertstoreorderreservation">
+      INSERT INTO
+      Store_order_reservation
+      VALUES
+      (#{store_order_res_code},#{emp_code},SYSDATE,#{store_order_res_no})
+   </insert>
+
+   <insert id="insertstoreorderdetail">
+      INSERT INTO
+      Store_order_detail
+      VALUES
+      (#{store_order_detail_no},#{store_order_res_code},#{product_no},#{first_order_qty},SYSDATE,null)
+   </insert>
+
+   <insert id="insertproductstatus">
+      INSERT INTO
+      Process_status
+      Values(#{process_status_no},#{store_order_detail_no},1,SYSDATE,'Y')
+   </insert>
+
+   <insert id="insertCustomerreservation">
+      INSERT INTO Customer_reservation_list
+      (res_no,order_status_no,
+      product_no,customer_res_qty,emp_code,customer_no,customer_res_date)
+      VALUES(#{res_no},1,
+      (SELECT product_no FROM Product
+      WHERE product_name=#{product_name}
+      )
+      ,#{customer_res_qty},#{emp_code},#{customer_no},SYSDATE)
+
+   </insert>
+
+   <insert id="insertCustomer">
+      INSERT INTO CUSTOMER VALUES(
+      #{customer_code},
+      #{customer_no},
+      #{customer_name},
+      #{customer_phone},
+      #{customer_address}
+      )
+   </insert>
+   
+   <insert id="insertstoreinitem">
+      insert into store_in_item values(
+      #{store_in_item_no},
+      #{product_no},
+      #{confirm_qty},
+      #{emp_code},
+      SYSDATE
+      )
+   
+   </insert>
+     
+     
+   <select id="selectstoreinprostano" resultType="int">
+   select 
+   process_status_no 
+   from
+   Process_status 
+   where 
+   store_order_detail_no=#{store_order_detail_no} 
+   and process_no=6
+   
+   </select>
+   
+   <select id="selectproductno" resultType="int">
+   select
+   product_no 
+   from 
+   store_order_detail 
+   where 
+   store_order_detail_no=#{store_order_detail_no}
+   
+   </select>
+   
+   <select id="selectconfirmqty" resultType="String">
+   select
+   confirm_qty 
+   from 
+   process_management 
+   where 
+   store_order_detail_no=#{store_order_detail_no}
+   
+   </select>
+   
+   
+   <select id="selectfirstqty" resultType="String">
+   select
+   first_order_qty
+   from 
+   store_order_detail 
+   where 
+   store_order_detail_no=#{store_order_detail_no}
+   
+   </select>
+   
+ 
+   
+   <select id="selectjustproduct" resultType="com.bt.vo.ProductVo">
+    SELECT * from product
+   </select>
+   
+    <select id="getproductbyprotype" resultType="com.bt.vo.ProductVo">
+   SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+   select * from product where product_type_no=#{product_type_no}
+   <if test="sort==1">
+      ORDER BY product_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER BY product_name
+      </if>
+      <if test="sort==3">
+      ORDER BY product_price DESC
+      </if>
+      <if test="sort==4">
+      ORDER BY product_price
+      </if>
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+   </select>
+   
+   <select id="getallproductbyprice" resultType="com.bt.vo.ProductVo">
+   SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+	   select * from product
+	   where product_no is not null
+	   	
+	   
+   		<if test="price lte 100000">
+		and product_price between #{price}-50000 and #{price}
+		</if>
+		<if test="price gt 100000 and price lte 200000">
+		and product_price between #{price}-50000 and #{price}+50000
+		</if>
+		<if test="price gt 200000">
+		<![CDATA[
+		and product_price >= 200000
+		 ]]>
+		 </if>
+		ORDER BY product_price
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+   </select>
+   
+   
+   <select id="getbranchproductbyprotype" resultType="com.bt.vo.BranchStockVo">
+   SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+   select a.* from branch_stock a, product b
+	where a.product_no=b.product_no
+	and b.product_type_no=#{product_type_no}
+	and a.branch_no=#{branch_no}
+   
+   
+   	<if test="sort==1">
+      ORDER BY a.branch_stock_qty DESC
+      </if>
+      <if test="sort==2">
+      ORDER BY a.branch_stock_qty
+      </if>
+      <if test="sort==3">
+      ORDER BY b.product_price DESC
+      </if>
+      <if test="sort==4">
+      ORDER BY b.product_price
+      </if>
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+   </select>
+   
+   <select id="getbranchproductbyprice" resultType="com.bt.vo.BranchStockVo">
+   SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+	   select a.* from branch_stock a, product b
+		where a.product_no=b.product_no
+		<if test="price lte 100000">
+		and b.product_price between #{price}-50000 and #{price}
+		</if>
+		<if test="price gt 100000 and price lte 200000">
+		and b.product_price between #{price}-50000 and #{price}+50000
+		</if>
+		<if test="price gt 200000">
+		<![CDATA[
+		and product_price >= 200000
+		 ]]>
+		</if>
+		and a.branch_no=#{branch_no}
+   	
+   
+
+      ORDER BY b.product_price
+    
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+   </select>
+   
+   <select id="selectAllCustomer"
+      resultType="com.bt.sales.vo.CustomerVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT *
+      FROM
+      CUSTOMER
+      <if test="sort==null">
+      ORDER BY customer_no
+      </if>
+      <if test="sort==1">
+      ORDER BY customer_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER BY customer_name
+      </if>
+      <if test="sort==3">
+      ORDER BY customer_address
+      </if>
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+
+
+   </select>
+   
+   <select id="selectMaxstorerescode" resultType="String">
+   <![CDATA[
+      select max(store_order_reservation.store_order_res_code) from store_order_reservation
+
+
+      ]]>
+      </select>
+   
+   
+   <select id="selectByStoreorderdetailno" resultType="com.bt.vo.ProcessManagementVo">
+     select * from process_management where store_order_detail_no=#{store_order_detail_no}
+
+   </select>
+   
+   <select id="selectstoreorderresno"
+   resultType="int">
+   
+   select store_order_res_code 
+   from store_order_reservation 
+   where store_order_res_no= #{store_order_res_no}
+   </select>
+   
+   <select id="selectdetailBystoreorderrescode"
+   resultType="com.bt.vo.StoreOrderDetailVo">
+   select * from store_order_detail where store_order_res_code=#{store_order_res_code}
+   
+   </select>
+
+   
+   <select id="selectProductByBranchno"
+      resultType="com.bt.vo.ProductVo">
+      SELECT a.*
+      FROM PRODUCT A, BRANCH_STOCK B
+      WHERE a.product_no=b.product_no
+      AND b.branch_no=#{branch_no}
+      order by a.product_no DESC
+
+   </select>
+   
+   <select id="selectProductBytypeno"
+      resultType="com.bt.vo.ProductVo">
+      select c.* from branch_stock a, product_type b, product c
+      where a.product_no=c.product_no
+      and b.product_type_no=c.product_type_no
+      and a.branch_no=#{branch_no}
+   </select>
+   
+   <select id="selectProductByproductno"
+      resultType="com.bt.vo.ProductVo">
+      SELECT *
+      FROM 
+      PRODUCT 
+      WHERE PRODUCT_NO=#{product_no}
+   </select>
+   
+   <select id="selectproductfile"
+      resultType="com.bt.vo.ProductFileVo">
+      SELECT *
+      FROM 
+      PRODUCT_FILE
+      WHERE PRODUCT_NO=#{product_no}
+   </select>
+
+   <select id="selectAllCustomerReservation"
+      resultType="com.bt.sales.vo.Customer_reservation_listVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      a.res_no,a.order_status_no,a.product_no,a.customer_res_qty,a.emp_code,a.customer_no,a.customer_res_date
+      FROM
+      Customer_reservation_list A, Customer B, Reservation_status C, Product D
+      WHERE a.customer_no=b.customer_no
+      AND a.order_status_no=c.res_status_no
+      AND a.product_no= d.product_no
+      <if test="sort==1">
+      ORDER by a.res_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER by b.customer_name
+      </if>
+      <if test="sort==3">
+      ORDER by a.customer_res_qty DESC
+      </if>
+      <if test="sort==4">
+      ORDER by a.customer_res_qty
+      </if>
+      <if test="sort==5">
+      ORDER by a.customer_res_date DESC
+      </if>
+      <if test="sort==6">
+      ORDER by a.customer_res_date
+      </if>
+      <if test="sort==7">
+      ORDER by a.order_status_no
+      </if>
+      ) t1
+      ) t2
+      <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+
+
+   </select>
+   
+   
+   <select id="selectstoreorderres"
+   resultType="com.bt.vo.StoreOrderReservationVo">
+      
+         SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+        a.*
+      FROM
+      Store_order_reservation A, Branch D, Employee
+      E
+      where a.emp_code=e.emp_code
+      AND d.branch_no=e.branch_no
+      AND d.branch_no=#{branch_no}
+      
+      
+      <if test="sort==0">
+      order by a.store_order_res_date DESC
+      </if>
+      <if test="sort==1">
+      order by a.store_order_res_no DESC
+      </if>
+      <if test="sort==2">
+      order by a.store_order_res_date DESC
+      </if>
+      <if test="sort==3">
+      order by a.store_order_res_date
+      </if>
+      ) t1
+      ) t2
+      <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+   
+   </select>
+
+   <select id="selectstoreorderressearch"
+   resultType="com.bt.vo.StoreOrderReservationVo">
+      
+         SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+        a.*
+      FROM
+      Store_order_reservation A, Branch D, Employee
+      E
+      where a.emp_code=e.emp_code
+      AND d.branch_no=e.branch_no
+      AND d.branch_no=#{branch_no}
+      
+      <if test="store_order_res_no!=null">
+         AND a.store_order_res_no Like '%' || #{store_order_res_no} || '%'
+      </if>
+      <if test="emp_name!=null">
+         AND e.emp_name LIKE '%' || #{emp_name} || '%'
+
+      </if>
+      <if
+         test="store_order_start_date!=null and store_order_final_date!=null">
+         AND a.store_order_res_date BETWEEN TO_DATE(#{store_order_start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{store_order_final_date},'YYYY-MM-DD')
+
+      </if>
+      
+      <if test="sort==0">
+      order by a.store_order_res_date DESC
+      </if>
+      <if test="sort==1">
+      order by a.store_order_res_code DESC
+      </if>
+      <if test="sort==2">
+      order by a.store_order_res_date DESC
+      </if>
+      <if test="sort==3">
+      order by a.store_order_res_date
+      </if>
+      ) t1
+      ) t2
+      <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+   
+   </select>
+   
+   <select id="selectAllstoreorder"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      b.*
+      FROM
+      Store_order_reservation A, Store_order_detail B, Product C, Branch D, Process_status E
+      WHERE a.store_order_res_code=b.store_order_res_code
+      AND b.product_no=c.product_no
+      AND e.store_order_detail_no=b.store_order_detail_no
+      AND e.flag='Y'
+      AND d.branch_no=#{branch_no}
+      <if test="sort==1">
+      ORDER by b.store_order_detail_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER by b.first_order_qty DESC
+      </if>
+      <if test="sort==3">
+      ORDER by b.first_order_qty 
+      </if>
+      <if test="sort==4">
+      ORDER by b.store_order_generating_time DESC
+      </if>
+      <if test="sort==5">
+      ORDER by b.store_order_generating_time
+      </if>
+      ) t1
+      ) t2
+      <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+
+
+   </select>
+   
+   
+   
+   
+   <select id="selectstoreordersearch"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      b.store_order_detail_no,b.store_order_res_code,b.product_no,b.first_order_qty,b.store_order_generating_time,b.store_order_completion_time
+      FROM
+      Store_order_reservation A, Store_order_detail B, Product C, Branch D, Employee
+      E,Process_status F
+      WHERE a.store_order_res_code=b.store_order_res_code
+      AND b.product_no=c.product_no
+      AND e.emp_code=a.emp_code
+      AND f.flag='Y'
+      AND f.store_order_detail_no=b.store_order_detail_no
+      AND d.branch_no=e.branch_no
+      AND d.branch_no=#{branch_no}
+      <if test="store_order_res_code!=0">
+         AND a.store_order_res_code=#{store_order_res_code}
+      </if>
+      <if test="emp_name!=null">
+         AND e.emp_name LIKE '%' || #{emp_name} || '%'
+
+      </if>
+      <if
+         test="store_order_start_date!=null and store_order_final_date!=null">
+         AND a.store_order_res_date BETWEEN TO_DATE(#{store_order_start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{store_order_final_date},'YYYY-MM-DD') 
+         
+      </if>
+      <if test="sort==1">
+      ORDER by b.store_order_detail_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER by b.first_order_qty DESC
+      </if>
+      <if test="sort==3">
+      ORDER by b.first_order_qty 
+      </if>
+      <if test="sort==4">
+      ORDER by b.store_order_generating_time DESC
+      </if>
+      <if test="sort==5">
+      ORDER by b.store_order_generating_time
+      </if>
+      ) t1
+      ) t2
+      <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+
+
+   </select>
+	
+	<select id="selectCustomerReservationshow"
+      resultType="com.bt.sales.vo.Customer_reservation_listVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      a.res_no,a.order_status_no,a.product_no,a.customer_res_qty,a.emp_code,a.customer_no,a.customer_res_date
+      FROM
+      Customer_reservation_list A, Customer B, Reservation_status C, Product D
+      WHERE a.customer_no=b.customer_no
+      AND a.order_status_no=c.res_status_no
+      AND a.product_no= d.product_no
+      <if test="order_status_no!=0">
+         AND a.order_status_no = #{order_status_no} 
+      </if>
+     <if test="sort==1">
+      ORDER by a.res_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER by b.customer_name
+      </if>
+      <if test="sort==3">
+      ORDER by a.customer_res_qty DESC
+      </if>
+      <if test="sort==4">
+      ORDER by a.customer_res_qty
+      </if>
+      <if test="sort==5">
+      ORDER by a.customer_res_date DESC
+      </if>
+      <if test="sort==6">
+      ORDER by a.customer_res_date
+      </if>
+      <if test="sort==7">
+      ORDER by a.order_status_no
+      </if>
+   		
+      ) t1
+      ) t2
+      <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+
+
+   </select>
+   
+	
+   <select id="selectCustomerReservationsearch"
+      resultType="com.bt.sales.vo.Customer_reservation_listVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      a.res_no,a.order_status_no,a.product_no,a.customer_res_qty,a.emp_code,a.customer_no,a.customer_res_date
+      FROM
+      Customer_reservation_list A, Customer B, Reservation_status C, Product D
+      WHERE a.customer_no=b.customer_no
+      AND a.order_status_no=c.res_status_no
+      AND a.product_no= d.product_no
+      <if test="order_status_no!=0">
+         AND a.order_status_no = #{order_status_no} 
+      </if>
+      <if test="customer_name!=null">
+         AND b.customer_name LIKE '%' || #{customer_name} || '%'
+      </if>
+      <if test="sort==1">
+      ORDER by a.res_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER by b.customer_name
+      </if>
+      <if test="sort==3">
+      ORDER by a.customer_res_qty DESC
+      </if>
+      <if test="sort==4">
+      ORDER by a.customer_res_qty
+      </if>
+      <if test="sort==5">
+      ORDER by a.customer_res_date DESC
+      </if>
+      <if test="sort==6">
+      ORDER by a.customer_res_date
+      </if>
+      <if test="sort==7">
+      ORDER by a.order_status_no
+      </if>
+      ) t1
+      ) t2
+      <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+
+
+   </select>
+
+   <select id="selectCustomersearch"
+      resultType="com.bt.sales.vo.CustomerVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT *
+      FROM
+      CUSTOMER
+      WHERE CUSTOMER_CODE IS NOT NULL
+      <if test="customer_name!=null">
+         AND customer_name LIKE '%' || #{customer_name} || '%'
+      </if>
+      <if test="customer_phone!=null">
+         AND customer_phone LIKE '%' || #{customer_phone} || '%'
+      </if>
+       
+      <if test="sort==1">
+      ORDER BY customer_no DESC
+      </if>
+      <if test="sort==2">
+      ORDER BY customer_name
+      </if>
+      <if test="sort==3">
+      ORDER BY customer_address
+      </if>
+      
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+      ]]>
+
+
+   </select>
+
+   <select id="selectByProductno"
+      resultType="com.bt.vo.ProductVo">
+   <![CDATA[
+      SELECT *
+       FROM Product
+      WHERE product_no = #{product_no} 
+   ]]>
+   </select>
+
+   <select id="selectByCustomerno"
+      resultType="com.bt.sales.vo.CustomerVo">
+   <![CDATA[
+      SELECT *
+       FROM Customer
+      WHERE customer_no = #{customer_no} 
+   ]]>
+   </select>
+
+   <select id="selectByorderstatusno"
+      resultType="com.bt.sales.vo.Reservation_statusVo">
+   <![CDATA[
+      SELECT *
+       FROM Reservation_status
+      WHERE res_status_no = #{order_status_no} 
+   ]]>
+   </select>
+
+   <select id="statusselectByStoreorderdetailno"
+      resultType="com.bt.vo.ProcessStatusVo">
+   <![CDATA[
+      SELECT *
+       FROM Process_status
+      WHERE store_order_detail_no =#{store_order_detail_no}
+      AND PROCESS_STATUS_NO=(SELECT MAX(PROCESS_STATUS_NO) FROM PROCESS_STATUS WHERE STORE_ORDER_DETAIL_NO=#{store_order_detail_no})
+      
+   ]]>
+   </select>
+   
+    <select id="statusselectByStoreorderdetailno2"
+      resultType="com.bt.vo.ProcessStatusVo">
+   <![CDATA[
+      SELECT *
+       FROM Process_status
+      WHERE store_order_detail_no =#{store_order_detail_no}
+     
+   ]]>
+   </select>
+
+   <select id="selectBystoreorderrescode"
+      resultType="com.bt.vo.StoreOrderReservationVo">
+   <![CDATA[
+      SELECT *
+       FROM Store_order_reservation
+      WHERE store_order_res_code = #{store_order_res_code} 
+   ]]>
+   </select>
+   
+   <select id="selectallProduct"
+      resultType="com.bt.vo.ProductVo">
+   
+      SELECT * 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+             select * 
+             from 
+             product
+            <if test="sort==1">
+                  ORDER BY product_no
+                </if>
+                <if test="sort==2">
+               ORDER BY product_name
+                </if>
+                <if test="sort==3">
+                 ORDER BY product_price DESC
+                </if>
+                <if test="sort==4">
+               ORDER BY product_price    
+                </if>
+              ) t1
+             ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+   
+   <select id="selectallproductsearch"
+      resultType="com.bt.vo.ProductVo">
+   
+      SELECT * 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+             select * 
+             from 
+             product
+             where product_no is not null
+             
+             <if test="product_type_no!=null">
+            AND PRODUCT_TYPE_NO = #{product_type_no}
+            </if>
+            <if test="product_no!=null">
+            AND product_no = #{product_no}
+            </if>
+            <if test="product_name!=null">
+            AND product_name LIKE '%' || #{product_name} || '%'
+            </if>
+             
+            <if test="sort==1">
+                  ORDER BY product_no
+                </if>
+                <if test="sort==2">
+               ORDER BY product_name
+                </if>
+                <if test="sort==3">
+                 ORDER BY product_price DESC
+                </if>
+                <if test="sort==4">
+               ORDER BY product_price    
+                </if>
+              ) t1
+             ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+   
+   
+   <select id="storeinselectBypriceBranchno"
+      resultType="com.bt.sales.vo.Store_in_itemVo">
+   
+      SELECT * 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+             SELECT b.*
+             FROM PRODUCT A, STORE_IN_ITEM B, EMPLOYEE C, BRANCH D
+             WHERE A.PRODUCT_NO=B.PRODUCT_NO
+             AND b.emp_code=c.emp_code
+                AND d.branch_no=#{branch_no}
+                AND c.branch_no=d.branch_no
+         		<if test="price lte 100000">
+				and a.product_price between #{price}-50000 and #{price}
+				</if>
+				<if test="price gt 100000 and price lte 200000">
+				and a.product_price between #{price}-50000 and #{price}+50000
+				</if>
+				<if test="price gt 200000">
+				<![CDATA[
+		and product_price >= 200000
+		 ]]>
+		</if>
+                ORDER BY b.product_no
+              
+               
+              ) t1
+             ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+   
+   <select id="storeinselectByBranchno"
+      resultType="com.bt.sales.vo.Store_in_itemVo">
+   
+      SELECT * 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+             SELECT b.store_in_item_no,b.product_no,b.in_item_qty,b.emp_code,b.in_item_date
+             FROM PRODUCT A, STORE_IN_ITEM B, EMPLOYEE C, BRANCH D
+             WHERE A.PRODUCT_NO=B.PRODUCT_NO
+             AND b.emp_code=c.emp_code
+                AND d.branch_no=#{branch_no}
+                AND c.branch_no=d.branch_no
+            <if test="sort==1">
+                ORDER BY b.in_item_qty DESC
+                </if>
+                <if test="sort==2">
+                ORDER BY b.in_item_qty
+                </if>
+                <if test="sort==3">
+                ORDER BY b.in_item_date DESC
+                </if>
+                <if test="sort==4">
+                ORDER BY b.in_item_date 
+                </if>
+              ) t1
+             ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+	
+	<select id="storeoutselectBypriceBranchno"
+      resultType="com.bt.sales.vo.Store_out_itemVo">
+   
+      SELECT * 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+             SELECT b.*
+             FROM PRODUCT A, STORE_OUT_ITEM B, EMPLOYEE C, BRANCH D
+             WHERE A.PRODUCT_NO=B.PRODUCT_NO
+             AND b.emp_code=c.emp_code
+                AND d.branch_no=#{branch_no}
+                AND c.branch_no=d.branch_no
+         		<if test="price lte 100000">
+				and a.product_price between #{price}-50000 and #{price}
+				</if>
+				<if test="price gt 100000 and price lte 200000">
+				and a.product_price between #{price}-50000 and #{price}+50000
+				</if>
+				<if test="price gt 200000">
+				<![CDATA[
+		and product_price >= 200000
+		 ]]>
+		</if>
+                ORDER BY b.product_no
+              
+               
+              ) t1
+             ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+	
+	
+   <select id="storeoutselectByBranchno"
+      resultType="com.bt.sales.vo.Store_out_itemVo">
+   
+      SELECT * 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+             SELECT b.store_out_item_no,b.product_no,b.out_item_qty,b.emp_code,b.out_item_date
+             FROM PRODUCT A, STORE_OUT_ITEM B, EMPLOYEE C, BRANCH D
+             WHERE A.PRODUCT_NO=B.PRODUCT_NO
+             AND b.emp_code=c.emp_code
+                AND d.branch_no=#{branch_no}
+                AND c.branch_no=d.branch_no
+            <if test="sort==1">
+                ORDER BY b.store_out_item_no DESC
+                </if>
+                <if test="sort==2">
+                ORDER BY b.out_item_qty DESC
+                </if>
+                <if test="sort==3">
+                ORDER BY b.out_item_qty
+                </if>
+                <if test="sort==4">
+                ORDER BY a.product_price DESC
+                </if>
+                <if test="sort==5">
+                ORDER BY a.product_price
+                </if>
+              ) t1
+             ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+   
+   <select id="selectBranchStock"
+      resultType="com.bt.vo.BranchStockVo">
+
+      
+      SELECT *
+      FROM branch_stock
+      where branch_no=#{branch_no}
+      
+   
+
+   </select>
+   
+   <select id="selectByBranchno"
+      resultType="com.bt.vo.BranchStockVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT B.BRANCH_STOCK_NO, B.BRANCH_NO,B.PRODUCT_NO,B.BRANCH_STOCK_QTY
+      FROM PRODUCT A, BRANCH_STOCK B, PRODUCT_TYPE C
+      WHERE A.PRODUCT_TYPE_NO=C.PRODUCT_TYPE_NO
+      AND B.branch_no=#{branch_no}
+      AND A.PRODUCT_NO=B.PRODUCT_NO
+      
+      <if test="sort==1">
+         ORDER BY B.BRANCH_STOCK_QTY DESC
+      </if>
+      <if test="sort==2">
+         ORDER BY B.BRANCH_STOCK_QTY
+      </if>
+      <if test="sort==3">
+         ORDER BY A.product_price DESC
+      </if>
+      <if test="sort==4">
+         ORDER BY A.product_price
+      </if>
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+
+   </select>
+
+   <select id="selectByProducttypeno"
+      resultType="com.bt.vo.ProductTypeVo">
+   <![CDATA[
+      SELECT *
+       FROM PRODUCT_TYPE
+       WHERE product_type_no=#{product_type_no}
+   ]]>
+   </select>
+
+   <select id="storeinselectsearch"
+      resultType="com.bt.sales.vo.Store_in_itemVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      b.store_in_item_no,b.product_no,b.in_item_qty,b.emp_code,b.in_item_date
+      FROM PRODUCT A, STORE_IN_ITEM B, EMPLOYEE C, BRANCH D
+      WHERE A.PRODUCT_NO=B.PRODUCT_NO
+      AND b.emp_code=c.emp_code
+      AND c.branch_no=d.branch_no
+      AND d.branch_no=#{branch_no}
+      <if test="store_in_item_no!=0">
+         AND b.store_in_item_no=#{store_in_item_no}
+      </if>
+      <if test="product_name!=null">
+      
+         AND a.product_name LIKE '%' || #{product_name} || '%' 
+      </if>
+        <if test="emp_name!=null">
+      
+         AND c.emp_name LIKE '%' || #{emp_name} || '%' 
+      </if>
+      <if test="in_start_date!=null and in_final_date!=null">
+         AND b.in_item_date BETWEEN TO_DATE(#{in_start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{in_final_date},'YYYY-MM-DD') 
+        
+      </if>
+
+      ORDER BY b.store_in_item_no DESC
+      ) t1
+      ) t2
+   
+          <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+
+   </select>
+
+   <select id="storeoutselectsearch"
+      resultType="com.bt.sales.vo.Store_out_itemVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT
+      b.store_out_item_no,b.product_no,b.out_item_qty,b.emp_code,b.out_item_date
+      FROM PRODUCT A, STORE_OUT_ITEM B, EMPLOYEE C, BRANCH D
+      WHERE A.PRODUCT_NO=B.PRODUCT_NO
+      AND b.emp_code=c.emp_code
+      AND c.branch_no=d.branch_no
+      AND d.branch_no=#{branch_no}
+      <if test="store_out_item_no!=0">
+         AND b.store_out_item_no=#{store_out_item_no}
+      </if>
+      <if test="product_name!=null">
+         AND a.product_name LIKE '%' || #{product_name} || '%' 
+      </if>
+      <if test="out_start_date!=null and out_final_date!=null">
+         AND b.out_item_date BETWEEN TO_DATE(#{out_start_date},'YYYY-MM-DD') AND
+         TO_DATE(#{out_final_date},'YYYY-MM-DD') 
+     
+      </if>
+      <if test="emp_name!=null">
+         AND c.emp_name LIKE '%' || #{emp_name} || '%'
+      </if>
+      
+            <if test="sort==1">
+                ORDER BY b.store_out_item_no DESC
+                </if>
+                <if test="sort==2">
+                ORDER BY b.out_item_qty DESC
+                </if>
+                <if test="sort==3">
+                ORDER BY b.out_item_qty
+                </if>
+                <if test="sort==4">
+                ORDER BY a.product_price DESC
+                </if>
+                <if test="sort==5">
+                ORDER BY a.product_price
+                </if>
+      ) t1
+      ) t2
+   
+          <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+
+   </select>
+   
+   <select id="getProductDataCount"
+      resultType="int">
+
+      SELECT count(*)
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT B.BRANCH_STOCK_NO, B.BRANCH_NO,B.PRODUCT_NO,B.BRANCH_STOCK_QTY
+      FROM PRODUCT A, BRANCH_STOCK B, PRODUCT_TYPE C
+      WHERE A.PRODUCT_TYPE_NO=C.PRODUCT_TYPE_NO
+      AND B.branch_no=#{branch_no}
+      AND A.PRODUCT_NO=B.PRODUCT_NO
+
+      <if test="product_type_no!=null">
+         AND C.PRODUCT_TYPE_NO = #{product_type_no}
+      </if>
+      <if test="product_no!=null">
+         AND A.product_no = #{product_no}
+      </if>
+      <if test="product_name!=null">
+         AND A.product_name LIKE '%' || #{product_name} || '%'
+      </if>
+
+      ) t1
+      ) t2
+ 
+   </select>
+   
+   <select id="selectByproductnosearch"
+      resultType="com.bt.vo.BranchStockVo">
+
+      SELECT *
+      FROM(
+      SELECT ROWNUM rnum,t1.*
+      FROM (
+      SELECT B.BRANCH_STOCK_NO, B.BRANCH_NO,B.PRODUCT_NO,B.BRANCH_STOCK_QTY
+      FROM PRODUCT A, BRANCH_STOCK B, PRODUCT_TYPE C
+      WHERE A.PRODUCT_TYPE_NO=C.PRODUCT_TYPE_NO
+      AND B.branch_no=#{branch_no}
+      AND A.PRODUCT_NO=B.PRODUCT_NO
+
+      <if test="product_type_no!=null">
+         AND C.PRODUCT_TYPE_NO = #{product_type_no}
+      </if>
+      <if test="product_no!=null">
+         AND A.product_no = #{product_no}
+      </if>
+      <if test="product_name!=null">
+         AND A.product_name LIKE '%' || #{product_name} || '%'
+      </if>
+
+      <if test="sort==1">
+         ORDER BY B.BRANCH_STOCK_QTY DESC
+      </if>
+      <if test="sort==2">
+         ORDER BY B.BRANCH_STOCK_QTY
+      </if>
+      <if test="sort==3">
+         ORDER BY A.product_price DESC
+      </if>
+      <if test="sort==4">
+         ORDER BY A.product_price
+      </if>
+
+      ) t1
+      ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+
+   <select id="storeorderselectByBranchno"
+      resultType="com.bt.vo.StoreOrderDetailVo">
+
+      SELECT * 
+      FROM(
+         SELECT ROWNUM rnum,t1.*
+          FROM (
+          
+             SELECT a.*
+             from Store_order_detail a, STORE_ORDER_RESERVATION b, Process_status c, Process_Management d, product e
+             where a.store_order_res_code=b.store_order_res_code
+             and a.store_order_detail_no=c.store_order_detail_no
+             and c.store_order_detail_no=d.store_order_detail_no
+             and c.process_no=5
+             and e.product_no=a.product_no
+             and c.store_order_detail_no in
+                (SELECT store_order_detail_no
+                FROM Process_status
+                GROUP BY store_order_detail_no
+                HAVING MAX(process_no) = 5)
+             and c.flag='Y'
+             and b.emp_code in (SELECT distinct(a.emp_code) FROM EMPLOYEE A, STORE_ORDER_RESERVATION B, BRANCH C
+            WHERE A.EMP_CODE=B.EMP_CODE
+            AND A.BRANCH_NO=C.BRANCH_NO
+            AND c.branch_no=#{branch_no})
+          
+                 <if test="sort==1">
+            ORDER BY a.store_order_detail_no DESC
+            </if>
+                 <if test="sort==2">
+            ORDER BY e.product_price DESC
+            </if>
+                 <if test="sort==3">
+            ORDER BY e.product_price
+            </if>
+                 <if test="sort==4">
+            ORDER BY d.confirm_qty DESC
+            </if>
+                 <if test="sort==5">
+            ORDER BY d.confirm_qty
+            </if>
+            
+              ) t1
+             ) t2
+   <![CDATA[
+          WHERE t2.rnum >=(#{currPage}-1)*10+1 AND t2.rnum<= #{currPage}*10   
+   ]]>
+   </select>
+
+   <insert id="insertprocess">
+      insert into 
+      Process_status values
+      (#{process_status_no},#{store_order_detail_no},6,SYSDATE,'Y')
+
+   </insert>
+   
+   <insert id="storeoutprocess">
+      Insert 
+      into 
+      store_out_item values
+      (#{store_out_item_no},#{product_no},#{out_item_qty},#{emp_code},SYSDATE)
+   </insert>
+   
+   <update id="rejectprocess">
+      update process_status
+      set
+      flag='N'
+      where
+      process_status_no=#{process_status_no}
+   </update>
+   
+   <update id="outstock">
+   UPDATE BRANCH_STOCK SET
+      branch_stock_qty=branch_stock_qty-
+      (SELECT c.out_item_qty FROM BRANCH_STOCK A, PRODUCT B, STORE_OUT_ITEM C
+      WHERE a.branch_no=13
+      AND a.product_no=b.product_no
+      AND b.product_no=c.product_no
+      AND c.store_out_item_no=#{store_out_item_no})
+      where branch_no=#{branch_no}
+      and product_no=#{product_no}
+   
+   </update>
+   <update id="updatestock">
+      UPDATE BRANCH_STOCK SET
+      branch_stock_qty=branch_stock_qty+(SELECT b.confirm_qty FROM
+      PROCESS_STATUS A, PROCESS_MANAGEMENT B, STORE_ORDER_DETAIL C,
+      BRANCH_STOCK D
+      WHERE D.BRANCH_NO=#{branch_no}
+      AND
+      a.process_status_no=#{process_status_no}
+      AND
+      a.store_order_detail_no=b.store_order_detail_no
+      AND
+      c.store_order_detail_no=b.store_order_detail_no
+      AND
+      c.product_no=d.product_no
+      AND
+      a.process_no=6)
+      WHERE product_no=(SELECT c.product_no FROM PROCESS_STATUS A,
+      PROCESS_MANAGEMENT B, STORE_ORDER_DETAIL C, BRANCH_STOCK D
+      WHERE
+      D.BRANCH_NO=#{branch_no}
+      AND
+      a.process_status_no=#{process_status_no}
+      AND
+      a.store_order_detail_no=b.store_order_detail_no
+      AND
+      c.store_order_detail_no=b.store_order_detail_no
+      AND
+      c.product_no=d.product_no
+      AND
+      a.process_no=6)
+   </update>
+   
+   <update id="updateorderdetail">
+      update 
+      store_order_detail 
+      set 
+      store_order_completion_time=SYSDATE 
+      where store_order_detail_no=#{store_order_detail_no}
+   
+   </update>
+
+	<update id="updatecustomerreservation">
+      update
+      customer_reservation_list 
+      set order_status_no=2 
+      where res_no=#{res_no}
+   
+   </update>
+
+   <select id="selectByTitleCount" resultType="int">
+   <![CDATA[   
+      SELECT COUNT(*) FROM BRANCH_STOCK
+      WHERE PRODUCT_NO = #{product_no}
+   ]]>
+   </select>
+   
+   <select id="getmaxcusno" resultType="int">
+   <![CDATA[   
+      select max(customer_no) from customer
+   ]]>
+   </select>
+
+</mapper>

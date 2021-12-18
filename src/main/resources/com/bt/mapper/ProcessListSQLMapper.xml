@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.ProcessListSQLMapper">
+
+<select id="selectByPrNo"
+		resultType="com.bt.vo.ProcessListVo">
+	<![CDATA[
+		SELECT * FROM Process_list WHERE process_no = #{process_no}
+	]]>
+	</select>
+	
+	<select id="selectByMax"
+		resultType="com.bt.vo.ProcessListVo">
+	<![CDATA[
+		SELECT 
+			l.process_name,
+			l.process_no
+		FROM (
+			SELECT MAX(process_no) as max FROM Process_status
+			WHERE store_order_detail_no = #{store_order_detail_no}
+			GROUP BY store_order_detail_no) t1, Process_list l
+		WHERE t1.max = l.process_no
+	]]>
+	</select>
+</mapper>

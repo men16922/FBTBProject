@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bt.mapper.AreaSQLMapper">
+
+   
+   <insert id="addArea">   
+   <![CDATA[
+   insert into area values(
+    AREA_SEQ.nextval,#{dept_no},
+    (select branch_no from branch where branch_name = #{branch_name}))
+    ]]>
+   </insert>
+   
+   <select id="selectAll" resultType="com.bt.vo.AreaVo">   
+   <![CDATA[
+      select * from area
+    ]]>
+   </select>
+   
+   
+   <select id="selectByDeptNo" resultType="com.bt.vo.AreaVo">   
+   <![CDATA[
+      select * from area where dept_no = #{dept_no}
+    ]]>
+   </select>
+</mapper>
